@@ -41,7 +41,7 @@ tinykeys.tinykeys(~~\0@*~~\A.get().at(0),{~
         collect (list keys prevent-default stop-propagation id) into parameters
         finally (return (format nil *tinykeys-format-string* parameters))))
 
-(defun generate-condition-clause (clause)
+(defun generate-condition-clause (clause clog-obj)
   (let ((condition (first clause))
         (event-handler (generate-event-handler (rest clause)))
         (script (generate-script (rest clause))))
@@ -49,13 +49,12 @@ tinykeys.tinykeys(~~\0@*~~\A.get().at(0),{~
        (let ((event-name (format nil "TKS~D" (clog:generate-id)))
              (event-handler ,event-handler)
              (script ,script))
-         (clog:set-on-event-with-data clog-obj event-name event-handler :cancel-event t)
-         (clog:js-execute clog-obj (format nil script (clog:jquery clog-obj) event-name))))))
+         (clog:set-on-event-with-data ,clog-obj event-name event-handler :cancel-event t)
+         (clog:js-execute ,clog-obj (format nil script (clog:jquery ,clog-obj) event-name))))))
 
 (defmacro set-on-keys (clog-obj &body clauses)
   (if (plusp (length clauses))
-      `(let ((clog-obj ,clog-obj))
-         ,@(loop for clause in clauses
-                 collect (generate-condition-clause clause) into code
-                 finally (return code)))
+      `(progn ,@(loop for clause in clauses
+                      collect (generate-condition-clause clause clog-obj) into code
+                      finally (return code)))
       nil))
