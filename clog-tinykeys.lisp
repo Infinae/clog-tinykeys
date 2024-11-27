@@ -51,21 +51,16 @@ tinykeys.tinykeys(~~\0@*~~\A.get().at(0), { ~
         collect (list keys always-active* prevent-default stop-propagation id) into parameters
         finally (return (format nil *tinykeys-format-string* parameters))))
 
-(defun generate-condition-clause (clause clog-obj always-active)
-  (let ((condition (first clause))
-        (event-handler (generate-event-handler (rest clause)))
-        (script (generate-script (rest clause) always-active))
-        (js-always-active (if always-active "true" "false")))
-    `(when ,condition
-       (let ((event-name (format nil "TKS~D" (clog:generate-id)))
-             (event-handler ,event-handler)
-             (script ,script))
-         (clog:set-on-event-with-data (clog:connection-body ,clog-obj) event-name event-handler :cancel-event t)
-         (clog:js-execute ,clog-obj (format nil script (clog:jquery ,clog-obj) event-name))))))
+(defun generate-keybindings (keybindings clog-obj always-active)
+  (let ((event-handler (generate-event-handler keybindings))
+        (script (generate-script keybindings always-active)))
+    `(let ((event-name (format nil "TKS~D" (clog:generate-id)))
+           (event-handler ,event-handler)
+           (script ,script))
+       (clog:set-on-event-with-data (clog:connection-body ,clog-obj) event-name event-handler :cancel-event t)
+       (clog:js-execute ,clog-obj (format nil script (clog:jquery ,clog-obj) event-name)))))
 
-(defmacro set-on-keys ((clog-obj &key (always-active nil)) &body clauses)
-  (if (plusp (length clauses))
-      `(progn ,@(loop for clause in clauses
-                      collect (generate-condition-clause clause clog-obj always-active) into code
-                      finally (return code)))
+(defmacro set-on-keys ((clog-obj &key (always-active nil)) &body keybindings)
+  (if (plusp (length keybindings))
+      (generate-keybindings keybindings clog-obj always-active)
       nil))

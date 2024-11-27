@@ -17,12 +17,11 @@ Clone repo to your local Common Lisp sources directory, then `(asdf:load-system 
 ;; and event target match. Override this behavior by setting
 ;; :always-active to t.
 (clog-tinykeys:set-on-keys (body :always-active t)
-  (t (:keys "f o o" :handler (lambda () (print 'foo)))
-     (:keys "Control+o" :handler #'open :prevent-default t :stop-propagation t))
-  ((zerop *count*)
-     ;; Since :always-active is set to t, specifying :always-active nil here
-     ;; will restore default behavior just for this keybinding.
-     (:keys "$mod+c" :handler #'show-count :always-active nil)
+  (:keys "f o o" :handler (lambda () (print 'foo)))
+  (:keys "Control+o" :handler #'open :prevent-default t :stop-propagation t)
+  ;; Since :always-active is set to t, specifying :always-active nil here
+  ;; will restore default behavior just for this keybinding.
+  (:keys "$mod+c" :handler #'show-count :always-active nil))
 ```
 
 
