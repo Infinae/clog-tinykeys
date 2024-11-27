@@ -12,71 +12,17 @@ Clone repo to your local Common Lisp sources directory, then `(asdf:load-system 
 
 **set-on-keys**:
 ``` common-lisp
-(clog-tinykeys:set-on-keys body
+;; Non-normative example showing supported declarations.
+;; By default handlers will only be triggered when the event listener
+;; and event target match. Override this behavior by setting
+;; :always-active to t.
+(clog-tinykeys:set-on-keys (body :always-active t)
   (t (:keys "f o o" :handler (lambda () (print 'foo)))
-     (:keys "Control+o" :handler #'open :prevent-default t :stop-propagation t)))
-```
-
-
-## Example
-``` common-lisp
-(defparameter *switches* (make-hash-table*))
-
-(defun switch (body)
-  (setf (title (html-document body)) "Switch")
-  (clog-tinykeys:load-tinykeys (html-document body))
-  (setf (display body) "flex")
-  (setf (flex-direction body) "horizontal")
-  (setf (column-gap body) "2em")
-  (labels ((update-switch (clog-obj)
-             (setf (background-color clog-obj)
-                   (if (gethash clog-obj *switches*)
-                       "orange" "lightgray")))
-           (create-switch (clog-obj)
-             (let ((switch (create-div clog-obj)))
-               (setf (width switch) "5em")
-               (setf (height switch) "5em")
-               (setf (display switch) "inline-block")
-               (update-switch switch)
-               switch)))
-    (let ((switch1 (create-switch body))
-          (switch2 (create-switch body)))
-      (flet ((toggle-switch1 (&optional event data)
-               (declare (ignorable event data))
-               (let ((value (gethash switch1 *switches*)))
-                 (setf (gethash switch1 *switches*) (not value)))
-               (update-switch switch1)) 
-             (toggle-switch2 (&optional event data)
-               (declare (ignorable event data))
-               (let ((value (gethash switch2 *switches*)))
-                 (setf (gethash switch2 *switches*) (not value)))
-               (update-switch switch2))
-             (toggle-both (&optional event data)
-               (declare (ignorable event data))
-               (let ((value1 (gethash switch1 *switches*))
-                     (value2 (gethash switch2 *switches*)))
-                 (setf (gethash switch1 *switches*) (not value1))
-                 (setf (gethash switch2 *switches*) (not value2)))
-               (update-switch switch1)
-               (update-switch switch2))
-             (turn-off-both (&optional event data)
-               (declare (ignorable event data))
-               (setf (gethash switch1 *switches*) nil)
-               (setf (gethash switch2 *switches*) nil)
-               (update-switch switch1)
-               (update-switch switch2))
-             (turn-on-both (&optional event data)
-               (declare (ignorable event data))
-               (setf (gethash switch1 *switches*) t)
-               (setf (gethash switch2 *switches*) t)
-               (update-switch switch1)
-               (update-switch switch2)))
-        (clog-tinykeys:set-on-keys body
-          (t (:keys "t 1" :handler #'toggle-switch1)
-             (:keys "t 2" :handler #'toggle-switch2)
-             (:keys "t b" :handler #'toggle-both)
-             (:keys "Control+o" :handler #'turn-on-both :prevent-default t)
-             (:keys "Escape" :handler #'turn-off-both)))))))
+     (:keys "Control+o" :handler #'open :prevent-default t :stop-propagation t))
+  ((zerop *count*)
+     ;; Since :always-active is set to t, specifying :always-active nil here
+     ;; will restore default behavior just for this keybinding.
+     (:keys "$mod+c" :handler #'show-count :always-active nil)
 ```
 
 
