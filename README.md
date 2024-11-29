@@ -12,23 +12,26 @@ Clone repo to your local Common Lisp sources directory, then `(asdf:load-system 
 
 **set-on-keys**:
 ``` common-lisp
-;; Non-normative example showing supported declarations.
+;; Supply an ID to be associated with the created
+;; keybindings. If no ID is supplied, SET-ON-KEYS
+;; will return a generated one for later use.
+(set-on-keys (body :id "global-keybindings")
+  (("m /" :prevent-default t) #'open-search-mode)
+  (("m e") #'open-edit-mode)
+  (("Escape" #'close-mode)))
 
-;; Supply an ID to be associated with the created keybindings. If no
-;; ID is supplied, SET-ON-KEYS will return a generated one for later use. 
+;; Remove keybindings associated with ID
+(set-on-keys (body :id "global-keybindings") nil)
 
-;; By default handlers will only be triggered when the event listener
-;; and event target match. Override this behavior by setting
-;; :always-active to t.
-(clog-tinykeys:set-on-keys (body :id "KEYS1" :always-active t)
-  (:keys "f o o" :handler (lambda () (print 'foo)))
-  (:keys "Control+o" :handler #'open :prevent-default t :stop-propagation t)
-  ;; Since :always-active is set to t, specifying :always-active nil here
-  ;; will restore default behavior just for this keybinding.
-  (:keys "$mod+c" :handler #'show-count :always-active nil))
-
-;; Remove keybindings associated with a given ID
-(clog-tinykeys:set-on-keys (body :id "KEYS1") nil)
+;; The handler has an implicit progn when it
+;; detects the absence of a function designator
+(let ((id (set-on-keys (input)
+            (("Control+u") (to-uppercase input))
+            (("Control+d") (to-downcase input))
+            (("Escape")
+             (setf (text-value input) "")
+             (blur input)))))
+  (set-on-keys (input :id id) nil))
 ```
 
 
