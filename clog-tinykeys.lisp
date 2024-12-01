@@ -91,6 +91,8 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
 
 (defun generate-keybindings (clog-obj id parameters keybindings)
   (assert (not (null keybindings)) nil "Please enter NIL or one or more keybinding forms.")
+  (when (and (= (length keybindings) 1) (null (first keybindings)))
+    (setf keybindings nil))
   (let* ((keybindings (loop for kb in keybindings collect (restructure-keybinding kb)))
          (keybindings (loop for kb in keybindings collect (merge-properties parameters kb)))
          (event-handler (generate-event-handler keybindings))
