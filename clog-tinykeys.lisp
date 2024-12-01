@@ -63,8 +63,8 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
         finally (return (format nil *tinykeys-format-string* parameters))))
 
 (defun normalise-id (id)
-  (assert (or (stringp id) (and (keywordp id) (eq id :undefined))))
-  (if (eq id :undefined)
+  (assert (or (stringp id) (not id)))
+  (if (not id)
       (format nil "TKS:~A" (clog:generate-id))
       (if (not (zerop (or (search "TKS:" id) -1)))
           (format nil "TKS:~A" id)
@@ -79,25 +79,15 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
           :prevent-default prevent-default
           :handler-body handler-body)))
 
-(defun merge-value (keyword outer-value inner-value)
-  (cond ((and (eq outer-value :undefined) (eq inner-value :undefined))
-         (cond ((eq keyword :trigger) :default)
-               ((eq keyword :stop-propagation) nil)
-               ((eq keyword :prevent-default) nil)))
-        ((eq inner-value :undefined) outer-value)
-        (t inner-value)))
-
 (defun merge-properties (outer-properties inner-properties)
   (loop for keyword in '(:trigger :stop-propagation :prevent-default)
         for outer-value = (getf outer-properties keyword)
         for inner-value = (getf inner-properties keyword)
-        nconc (list keyword (merge-value keyword outer-value inner-value)) into result
-        finally (return
-                  (concatenate
-                   'list
-                   (list :keys (getf inner-properties :keys))
-                   (list :handler-body (getf inner-properties :handler-body))
-                   result))))
+        nconc (list keyword (if (eq inner-value :undefined) outer-value inner-value)) into result
+        finally (return (concatenate 'list
+                                     (list :keys (getf inner-properties :keys))
+                                     (list :handler-body (getf inner-properties :handler-body))
+                                     result))))
 
 (defun generate-keybindings (clog-obj id parameters keybindings)
   (assert (not (null keybindings)) nil "Please enter NIL or one or more keybinding forms.")
@@ -110,7 +100,7 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
              ,@(when keybindings
                  `((event-handler ,event-handler)
                    (script ,script))))
-         ,@(unless (or (not id) (keywordp id) (eq id :undefined))
+         ,@(when id
              `((clog:set-on-event-with-data (clog:connection-body ,clog-obj) event-name nil)
                (clog:js-execute ,clog-obj (format nil "clogTinykeysUnsubscribers['~@*~A']?.(); delete clogTinykeysUnsubscribers['~@*~A'];" event-name))))
          ,@(when keybindings
@@ -121,10 +111,10 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
 (defmacro set-on-keys
     ((clog-obj
       &key
-        (id :undefined)
-        (trigger :undefined)
-        (stop-propagation :undefined)
-        (prevent-default :undefined))
+        (id nil)
+        (trigger :default)
+        (stop-propagation nil)
+        (prevent-default nil))
      &body keybindings)
   (generate-keybindings
    clog-obj id
