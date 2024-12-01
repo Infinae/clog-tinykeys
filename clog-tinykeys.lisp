@@ -24,9 +24,13 @@ clogTinykeysUnsubscribers['~~\1@*~~\A'] = (
     })
 )")
 
-(defun load-tinykeys (document)
-  (clog:load-script document "https://cdn.jsdelivr.net/npm/tinykeys@3.0.0/dist/tinykeys.umd.min.js")
-  (clog:js-execute document "clogTinykeysUnsubscribers = {}"))
+(defun load-tinykeys (clog-document &key (load-only-once t) (wait-timeout 3) (wait-for-load t))
+  (clog:load-script
+   clog-document "https://cdn.jsdelivr.net/npm/tinykeys@3.0.0/dist/tinykeys.umd.min.js"
+   :load-only-once load-only-once
+   :wait-timeout wait-timeout
+   :wait-for-load wait-for-load)
+  (clog:js-execute clog-document "clogTinykeysUnsubscribers = {}"))
 
 (defun generate-event-handler (plists)
   (loop for i from 0
