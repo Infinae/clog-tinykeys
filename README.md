@@ -4,27 +4,13 @@ clog-tinykeys is a CLOG plugin for defining application keyboard shortcuts to ca
 ## Installation
 Clone repo to your local Common Lisp sources directory, then `(asdf:load-system :clog-tinykeys)` or add as a dependency to your application's ASDF system definition.
 
-## Syntax
-<pre>
-<b>load-tinykeys</b> <i>clog-document</i> &key <i>load-only-once</i> <i>wait-timeout</i> <i>wait-for-load</i>
-⇒ boolean
-</pre>
-
-<pre>
-<b>set-on-keys</b>
-  (<i>clog-obj</i> &key <i>id</i> <i>trigger</i> <i>stop-propagation</i> <i>prevent-default</i>)
-    &rest { nil | ((<i>keys</i> &key <i>trigger</i> <i>stop-propagation</i> <i>prevent-default</i>) &body <i>handler</i>) }+
-⇒ string
-</pre>
-
-
-## Usage
-**load-tinykeys**:
+## Get Started
+**Load the plugin**:
 ``` common-lisp
 (clog-tinykeys:load-tinykeys (clog:html-document body))
 ```
 
-**set-on-keys**:
+**Create some keybindings**:
 ``` common-lisp
 ;; Supply an ID to be associated with the created
 ;; keybindings. If no ID is supplied, SET-ON-KEYS
@@ -48,6 +34,23 @@ Clone repo to your local Common Lisp sources directory, then `(asdf:load-system 
    (setf (text-value input) "")
    (blur input)))
 ```
+
+## Syntax
+<pre>
+<b>load-tinykeys</b> <i>clog-document</i> &key <i>load-only-once</i> <i>wait-timeout</i> <i>wait-for-load</i>
+⇒ boolean
+</pre>
+
+<pre>
+<b>set-on-keys</b>
+  (<i>clog-obj</i> &key <i>id</i> <i>trigger</i> <i>stop-propagation</i> <i>prevent-default</i>)
+    &rest { nil | ((<i>keys</i> &key <i>trigger</i> <i>stop-propagation</i> <i>prevent-default</i>) &body <i>handler</i>) }+
+⇒ string
+</pre>
+
+## Scoped keybindings
+tinykeys doesn't allow the creation of keybinding scopes, but a rudimentary form can be acheived by attaching keybindings to a DIV element and setting it's tab-index to -1 so that it can receive keyboard events. As long as that element or a child of that element, say an input, has focus then events will reach it.
+
 
 
 
